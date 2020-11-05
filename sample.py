@@ -1,11 +1,12 @@
 #
-import quandl
+#import quandl
 import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 
-from pandas_datareader import data as web
+#from pandas_datareader import data as web
+from pandas_datareader import data as pdr
 import datetime as dt
 import yfinance as yf
 yf.pdr_override()#!
@@ -23,29 +24,40 @@ quandl_api_key = 'ngoDsHD9gkKUzPdtWkax' #! add to .ini file
 
 app = dash.Dash('Stonks Dashboard')
 
-app.layout = html.Div([
+app.layout = html.Div(children=[
+    html.H1(children='Stonks Monitor'),
+
     dcc.Dropdown(
         id='my-dropdown',
         options=[
             {'label': 'Coke', 'value': 'COKE'},
             {'label': 'Tesla', 'value': 'TSLA'},
+            {'label': 'Nio', 'value': 'NIO'},
             {'label': 'Apple', 'value': 'AAPL'}
         ],
         value='COKE'
     ),
-    dcc.Graph(id='my-graph')
-], style={'width': '500'})
+    dcc.Graph(id='my-graph'),
+    html.Div(children='''
+        Time Span
+    '''),
+    dcc.RadioItems(
+        options=[
+            {'label': 'Day', 'value': 'day'},
+            {'label': 'Week', 'value': 'week'},
+            {'label': 'Month', 'value': 'month'}
+        ],
+        value='day',
+        labelStyle={'display': 'inline-block'},
+        style={'padding':'300'}
+    )
+], style={'width': '200'}
+)
 
 @app.callback(Output('my-graph', 'figure'), [Input('my-dropdown', 'value')])
 def update_graph(selected_dropdown_value):
-    df = web.DataReader(
-        name=selected_dropdown_value,
-        data_source = 'quandl',
-        start=dt.datetime(2017, 1, 1),
-        end=today,
-        #session=session,
-        api_key=quandl_api_key
-    )
+    df = pdr.get_data_yahoo(selected_dropdown_value, start=span_7_days, end=today)
+
 
     return {
         'data': [{
@@ -58,4 +70,4 @@ def update_graph(selected_dropdown_value):
 app.css.append_css({'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'})
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=False)
