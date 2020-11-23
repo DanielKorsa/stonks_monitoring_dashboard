@@ -1,15 +1,19 @@
 #
 #import quandl
 import dash
+import dash_table
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 
 #from pandas_datareader import data as web
+import pandas as pd
 from pandas_datareader import data as pdr
 import datetime as dt
 import yfinance as yf
-yf.pdr_override()#!
+yf.pdr_override()#! Connector from pandas_datareader to Yahoo Finance
+
+user_stonks_df = pd.read_csv('my_stonks.csv')
 
 today = dt.datetime.now()
 week = today - dt.timedelta(days=7)
@@ -19,8 +23,7 @@ span_30_days = month.replace(hour=0, minute=0, second=0, microsecond=0)
 year = today - dt.timedelta(days=365)
 span_365_days = year.replace(hour=0, minute=0, second=0, microsecond=0)
 
-quandl_api_key = 'ngoDsHD9gkKUzPdtWkax' #! add to .ini file
-#quandl.ApiConfig.api_key = api_key
+
 
 app = dash.Dash('Stonks Dashboard')
 
@@ -30,12 +33,12 @@ app.layout = html.Div(children=[
     dcc.Dropdown(
         id='my-dropdown',
         options=[
-            {'label': 'Coke', 'value': 'COKE'},
-            {'label': 'Tesla', 'value': 'TSLA'},
+            {'label': 'Blizzard', 'value': 'ACTIVISION BLIZZARD'},
+            {'label': 'Alibaba', 'value': 'ALIBABA'},
             {'label': 'Nio', 'value': 'NIO'},
             {'label': 'Apple', 'value': 'AAPL'}
         ],
-        value='COKE'
+        value='NIO'
     ),
     dcc.Graph(id='my-graph'),
     html.Div(children='''
@@ -50,7 +53,12 @@ app.layout = html.Div(children=[
         value='day',
         labelStyle={'display': 'inline-block'},
         style={'padding':'300'}
-    )
+    ),
+    dash_table.DataTable(
+    id='stonk_table',
+    columns=[{"name": i, "id": i} for i in user_stonks_df.columns],
+    data=user_stonks_df.to_dict('records'),
+)
 ], style={'width': '200'}
 )
 
