@@ -13,6 +13,7 @@ test.py
 __pycache__
 *.py[cod]
 *$py.class
+.gitignore
 
 # C extensions
 *.so
